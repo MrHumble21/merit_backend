@@ -1,8 +1,5 @@
-import json
-
 from app import app, db
 from app.models import User
-from app.models import Client
 from flask import jsonify, request
 
 
@@ -66,22 +63,26 @@ def delete(user_id):
         return jsonify(error={"Forbidden": "Sorry, that's not allowed. Make sure you have the correct api_key."}), 403
 
 
-@app.route("/create_user", methods=["POST"])
+@app.route("/add", methods=["POST"])
 def add_new_user():
-    data = request.data
-    data = json.loads(data)
-    print(data)
-
+    b = request.files['image']
+    print(b)
     # c = request.form.get('image')
     # print(c)
     # run $ flask run  -h 0.0.0.0 -p 8000
-    # new_user = User(
-    #     name=request.form.get("name"),
-    #     region=request.form.get("region"),
-    #     phone=request.form.get("phone"),
-    # )
-    # db.session.add(new_user)
-    # db.session.commit()
+    new_user = User(
+        image=request.form.get("image"),
+        name=request.form.get("name"),
+        birthdate=request.form.get("birthdate"),
+        gender=request.form.get("gender"),
+        country=request.form.get("country"),
+        region=request.form.get("region"),
+        phone=request.form.get("phone"),
+        email=request.form.get("email"),
+
+    )
+    db.session.add(new_user)
+    db.session.commit()
     return jsonify(response={"success": "Successfully added the new user."})
 
 
