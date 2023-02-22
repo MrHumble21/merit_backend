@@ -65,20 +65,13 @@ def delete(user_id):
 
 @app.route("/add", methods=["POST"])
 def add_new_user():
-    b = request.files['image']
-    print(b)
     # c = request.form.get('image')
     # print(c)
     # run $ flask run  -h 0.0.0.0 -p 8000
     new_user = User(
-        image=request.form.get("image"),
         name=request.form.get("name"),
-        birthdate=request.form.get("birthdate"),
-        gender=request.form.get("gender"),
-        country=request.form.get("country"),
         region=request.form.get("region"),
         phone=request.form.get("phone"),
-        email=request.form.get("email"),
 
     )
     db.session.add(new_user)
