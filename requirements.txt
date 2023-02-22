@@ -1,0 +1,4 @@
+Flask==2.2.2
+Flask_Migrate==4.0.4
+Flask_Script==2.0.6
+flask_sqlalchemy==3.0.3
