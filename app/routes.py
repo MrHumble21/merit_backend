@@ -5,8 +5,14 @@ from app.models import User
 from flask import jsonify, request
 
 
+@app.route("/aaa")
+def test():
+    return "<h1> hello </h1>"
+
+
 @app.route("/create_user", methods=["POST"])
 def add_new_user():
+    print("pls work")
     # data = json.load(request.data['name'])
     data = request.data.decode('utf8').replace("'", '"')
     myjson = json.loads(data)
@@ -18,8 +24,7 @@ def add_new_user():
     )
     db.session.add(new_user)
     db.session.commit()
-
-    return jsonify(response={"success": "Successfully added the new user."})
+    return "<h1> hello </h1>"
 
 
 ### create client
@@ -46,7 +51,9 @@ def add_new_order():
     print(myjson)
     new_order = Order(
         amount=myjson["amount"],
-        deadline=myjson["deadline"]
+        deadline=myjson["deadline"],
+        productCode=myjson['productCode'],
+        clientName=myjson['clientName']
     )
     db.session.add(new_order)
     db.session.commit()
@@ -287,6 +294,14 @@ def all_clients():
 #     else:
 #         return jsonify(error={"Forbidden": "Sorry, that's not allowed. Make sure you have the correct api_key."}), 403
 #
+
+@app.route("/get_client/<int:id>", methods=["GET"])
+def client(id):
+    get_client = [Client.query.get(id)]
+    one_client = [c.to_dict() for c in get_client]
+    # api_key = request.args.get("api-key")
+    print(one_client)
+    return jsonify(one_client)
 #
 # ######### CLIENT  CRUD #########
 # ### get all clients
