@@ -8,7 +8,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     password = db.Column(db.String(100), nullable=True)
-    phone = db.Column(db.String(100), nullable=True)
+    phone = db.Column(db.String(100), nullable=True, unique=True)
 
     def to_dict(self):  # automatic calling the dict (creating a func)
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}

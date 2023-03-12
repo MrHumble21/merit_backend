@@ -1,8 +1,15 @@
 import json
+from datetime import timedelta
+from pprint import pprint
+
+from sqlalchemy.exc import IntegrityError
+
 from app import app, db
 from app.models import Order, Product, Client
 from app.models import User
 from flask import jsonify, request
+import jwt
+from datetime import datetime, timedelta
 
 
 @app.route("/aaa")
@@ -12,19 +19,21 @@ def test():
 
 @app.route("/create_user", methods=["POST"])
 def add_new_user():
-    print("pls work")
-    # data = json.load(request.data['name'])
-    data = request.data.decode('utf8').replace("'", '"')
-    myjson = json.loads(data)
-    print(myjson)
-    new_user = User(
-        name=myjson["name"],
-        password=myjson["password"],
-        phone=myjson["phone"],
-    )
-    db.session.add(new_user)
-    db.session.commit()
-    return "<h1> hello </h1>"
+    try:
+        data = request.data.decode('utf8').replace("'", '"')
+        myjson = json.loads(data)
+        print(myjson)
+        new_user = User(
+            name=myjson["name"],
+            password=myjson["password"],
+            phone=myjson["phone"],
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        return jsonify({'message': 'User created successfully', 'status': 200}), 200
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'message': 'User already exists', 'status': 400}), 400
 
 
 ### create client
@@ -41,6 +50,30 @@ def add_new_client():
     db.session.add(new_client)
     db.session.commit()
     return jsonify(response={"success": "Successfully added the new client."})
+
+
+@app.route('/sign_in', methods=['POST'])
+def login():
+    # Get the username and password from the request body
+    data = request.data.decode('utf8').replace("'", '"')
+    myjson = json.loads(data)
+    print(myjson)
+    username = myjson['username']
+    password = myjson['password']
+    matched = User.query.filter_by(name=username, password=password).all()
+    all_matched_users = [user.to_dict() for user in matched]
+    print(all_matched_users)
+    if len(all_matched_users) == 0:
+        return jsonify({"message": "User not found, please check your username and password"}), 400
+    # Create a JWT token with a 1-hour expiration time
+
+    token = jwt.encode({
+        'username': username,
+        'exp': datetime.utcnow() + timedelta(hours=1)
+    }, app.config['SECRET_KEY'])
+
+    # Return the JWT token
+    return jsonify({'token': token.decode('utf-8'), 'user': all_matched_users}), 200
 
 
 ### create order
