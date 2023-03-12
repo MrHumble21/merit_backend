@@ -1,8 +1,5 @@
 import datetime
 
-from sqlalchemy import ForeignKey
-
-
 from app import db
 
 
@@ -16,6 +13,7 @@ class User(db.Model):
     def to_dict(self):  # automatic calling the dict (creating a func)
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
+
 class Order(db.Model):
     __tablename__ = 'order'
     id = db.Column(db.Integer, primary_key=True)
@@ -26,8 +24,10 @@ class Order(db.Model):
     isDelivered = db.Column(db.Boolean, nullable=True)
     orderedDate = db.Column(db.String, default=datetime.datetime.now(), nullable=True)
     deadline = db.Column(db.String, nullable=False)
+
     def to_dict(self):  # automatic calling the dict (creating a func)
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
 
 class Product(db.Model):
     __tablename__ = 'product'
@@ -40,12 +40,15 @@ class Product(db.Model):
 
     def to_dict(self):  # automatic calling the dict (creating a func)
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+
 class Client(db.Model):
     __tablename__ = 'client'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     region = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=True)
+
     def to_dict(self):  # automatic calling the dict (creating a func)
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 # flask db init
