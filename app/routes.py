@@ -88,7 +88,6 @@ def login():
         'username': username,
         'exp': datetime.utcnow() + timedelta(hours=1)
     }, app.config['SECRET_KEY'])
-
     payload = jwt.decode(token, 'secret_key', algorithms=['HS256'])
     print(payload)
     # Return the JWT token

@@ -16,6 +16,6 @@ if __name__ == '__main__':
 
 # python run.py
 
-# to make changes db
+# to make changes db  
     # python run.py db migrate
     # python run.py db upgrade
