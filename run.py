@@ -10,12 +10,8 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
 
 
-
-
-
-
 # python run.py
 
-# to make changes db  
+# to make changes db
     # python run.py db migrate
     # python run.py db upgrade
