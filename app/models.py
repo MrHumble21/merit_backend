@@ -6,9 +6,9 @@ from app import db
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(150), nullable=False)
+    name = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=True)
-    phone = db.Column(db.String(100), nullable=True, unique=True)
+    phone = db.Column(db.String(100), nullable=True,)
 
     def to_dict(self):  # automatic calling the dict (creating a func)
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
@@ -17,7 +17,7 @@ class User(db.Model):
 class Order(db.Model):
     __tablename__ = 'order'
     id = db.Column(db.Integer, primary_key=True)
-    userId = db.Column(db.String, nullable=True)
+    userId = db.Column(db.String, nullable=False)
     clientName = db.Column(db.String, nullable=True)
     productCode = db.Column(db.String, nullable=True)
     amount = db.Column(db.Integer, nullable=False)

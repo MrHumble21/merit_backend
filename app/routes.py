@@ -2,6 +2,7 @@ import json
 from datetime import timedelta
 from pprint import pprint
 
+from sqlalchemy import desc
 from sqlalchemy.exc import IntegrityError
 
 from app import app, db
@@ -22,7 +23,11 @@ def add_new_user():
     try:
         data = request.data.decode('utf8').replace("'", '"')
         myjson = json.loads(data)
-        print(myjson)
+        user = {
+            'name': myjson["name"],
+            'region': myjson["password"],
+            'phone': myjson["phone"],
+        }
         new_user = User(
             name=myjson["name"],
             password=myjson["password"],
@@ -30,7 +35,11 @@ def add_new_user():
         )
         db.session.add(new_user)
         db.session.commit()
-        return jsonify({'message': 'User created successfully', 'status': 200}), 200
+        token = jwt.encode({
+            'username': myjson["name"],
+            'exp': datetime.utcnow() + timedelta(hours=1)
+        }, app.config['SECRET_KEY'])
+        return jsonify({'token': token.decode('utf-8'), 'user': user}), 200
     except IntegrityError:
         db.session.rollback()
         return jsonify({'message': 'User already exists', 'status': 400}), 400
@@ -41,7 +50,11 @@ def add_new_user():
 def add_new_client():
     data = request.data.decode('utf8').replace("'", '"')
     myjson = json.loads(data)
-    print(myjson)
+    client = {
+        'name': myjson["name"],
+        'region': myjson["region"],
+        'phone': myjson["phone"],
+    }
     new_client = Client(
         name=myjson["name"],
         region=myjson["region"],
@@ -49,7 +62,11 @@ def add_new_client():
     )
     db.session.add(new_client)
     db.session.commit()
-    return jsonify(response={"success": "Successfully added the new client."})
+    token = jwt.encode({
+        'username': myjson["name"],
+        'exp': datetime.utcnow() + timedelta(hours=1)
+    }, app.config['SECRET_KEY'])
+    return jsonify({'token': token.decode('utf-8'), 'user': client}), 200
 
 
 @app.route('/sign_in', methods=['POST'])
@@ -72,8 +89,11 @@ def login():
         'exp': datetime.utcnow() + timedelta(hours=1)
     }, app.config['SECRET_KEY'])
 
+    payload = jwt.decode(token, 'secret_key', algorithms=['HS256'])
+    print(payload)
     # Return the JWT token
-    return jsonify({'token': token.decode('utf-8'), 'user': all_matched_users}), 200
+    return jsonify({'token': payload['username'], 'user': all_matched_users}), 200
+
 
 # dahnuass
 ### create order
@@ -82,11 +102,17 @@ def add_new_order():
     data = request.data.decode('utf8').replace("'", '"')
     myjson = json.loads(data)
     print(myjson)
+    # x = jwt.decode(myjson['userId'], 'secret_key', algorithms=['HS256'])
+    print("--------------------------------")
+    print(myjson)
+    print("--------------------------------")
+
     new_order = Order(
         amount=myjson["amount"],
         deadline=myjson["deadline"],
         productCode=myjson['productCode'],
-        clientName=myjson['clientName']
+        clientName=myjson['clientName'],
+        userId=myjson['userId'],
     )
     db.session.add(new_order)
     db.session.commit()
@@ -98,6 +124,33 @@ def all_orders():
     orders = db.session.query(Order).all()
     every_order = [order.to_dict() for order in orders]
     return jsonify(every_order)
+
+
+@app.route('/all_orders_for_dashboard', methods=['GET'])
+def all_orders_for_dashboard():
+    orders = db.session.query(Order).all()
+    item_counts = {}
+    for item in orders:
+        if item.productCode in item_counts:
+            item_counts[item.productCode] += 1
+        else:
+            item_counts[item.productCode] = 1
+
+    # Sort the dictionary in descending order based on the counts of the items
+    sorted_items = sorted(item_counts.items(), key=lambda x: x[1], reverse=True)
+
+    # Calculate the total count of all items
+    total_count = sum(item_counts.values())
+
+    # Calculate the total count of the top ten items
+    top_ten_count = sum([count for _, count in sorted_items[:10]])
+
+    # Calculate the percentage of the top ten items
+    top_ten_percentage = (top_ten_count / total_count) * 100
+
+    print(f"The top ten items represent {top_ten_percentage:.2f}% of the total count.")
+    print(f"The top ten items represent {item_counts}")
+    return jsonify({"top_sales": item_counts})
 
 
 @app.route('/all_clients', methods=['GET'])
